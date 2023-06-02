@@ -1,0 +1,35 @@
+app.get('/users',async(req,res)=>{
+    let conn;
+    try{
+        conn = await pool.getConnection()
+        const result = await conn.query('select users.name,users.email,roles.name as role from users join roles on users.role_id = roles.id')
+        res.json(result)
+    }
+    catch(err)
+    {
+        console.error(err)
+        res.status(500).send('Server Error')
+    }
+    finally
+    {
+        if(conn) conn.release()
+    }
+
+})
+
+app.post('/users', async (req,res) => {
+    const { name, email, role_id } = req.body; 
+    
+    let conn;
+    try {
+      conn = await pool.getConnection();
+      const result = await conn.query('INSERT INTO users (name, email, role_id) VALUES (?, ?, ?)', [name, email, role_id]);
+      
+      res.json({ message: 'User created successfully'});
+    } catch (err) {
+      console.error(err);
+      res.status(500).send('Server Error');
+    } finally {
+      if (conn) conn.release();
+    }
+  })
